@@ -1,0 +1,447 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>How AI Recommends Videos, Music and Products</title><style>*{box-sizing:border-box}
+html{background:#eceef9}
+:root{--ink:#1c2250;--muted:#4b5384;--card:#fff;--line:#d9def3;--indigo:#4a52c9;--moon:#f3c44f;--teal:#1fa79c;--coral:#e9604f;--lilac:#8a68dc;--sky:#3a8ee0;--soft:#f3f5fe}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;font-size:19px;line-height:1.5;color:var(--ink);min-height:100vh;
+background:
+radial-gradient(circle at calc(100% - 90px) 120px,#fffdf3 0 48px,#fbeeb9 49px 54px,rgba(251,238,185,.5) 55px 105px,rgba(251,238,185,0) 230px),
+radial-gradient(circle at 8% 22%,#b3bcea 0 2px,transparent 3px),
+radial-gradient(circle at 22% 9%,#c7b8ef 0 2px,transparent 3px),
+radial-gradient(circle at 41% 16%,#b3bcea 0 1.5px,transparent 2.5px),
+radial-gradient(circle at 63% 7%,#c7b8ef 0 2px,transparent 3px),
+radial-gradient(circle at 74% 28%,#b3bcea 0 1.5px,transparent 2.5px),
+radial-gradient(circle at 5% 64%,#c7b8ef 0 2px,transparent 3px),
+radial-gradient(circle at 95% 58%,#b3bcea 0 2px,transparent 3px),
+radial-gradient(circle at 33% 88%,#c7b8ef 0 1.5px,transparent 2.5px),
+radial-gradient(circle at 82% 92%,#b3bcea 0 2px,transparent 3px),
+linear-gradient(170deg,#edf1fc 0%,#e6e5f8 55%,#f3eefb 100%);
+background-attachment:fixed}
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;padding:10px 22px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{font-size:14px;font-weight:700;color:var(--indigo);letter-spacing:.3px}
+.lvl{font-size:14px;color:var(--muted);flex:1}
+.homebtn{font:inherit;font-size:15px;font-weight:700;background:#fff;border:2px solid var(--line);color:var(--indigo);border-radius:12px;padding:6px 14px;cursor:pointer}
+main{max-width:1120px;margin:0 auto;padding:24px 18px 70px}
+.page{display:none;animation:fade .35s}
+.page.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.luna{display:inline-block;width:110px}
+.luna svg{width:100%;height:auto;display:block}
+.big-luna{width:170px;animation:float 3.2s ease-in-out infinite}
+.title-card{min-height:76vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+.title-card h1{font-size:clamp(36px,5.4vw,60px);line-height:1.15;margin:6px 0 10px;max-width:900px}
+.chap{font-size:17px;font-weight:700;color:var(--lilac);background:#fff;border:2px solid var(--line);border-radius:999px;padding:6px 18px}
+.menu-h{font-size:36px;margin:4px 0 4px}
+.menu-sub{color:var(--muted);margin:0 0 18px}
+.grp-h{display:inline-block;font-weight:700;font-size:18px;padding:6px 16px;border-radius:999px;background:#fff;border:2px solid var(--line);margin:18px 0 12px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(235px,1fr));gap:16px}
+.mcard{font:inherit;position:relative;text-align:left;background:#fff;border:1px solid var(--line);border-top:7px solid var(--indigo);border-radius:20px;padding:16px 18px;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 20px rgba(60,70,150,.08);transition:transform .15s,box-shadow .15s;color:var(--ink)}
+.mcard:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(60,70,150,.15)}
+.mcard.g-Do{border-top-color:var(--teal)}.mcard.g-Wrap{border-top-color:var(--coral)}
+.mnum{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-weight:700;font-size:15px;color:var(--muted)}
+.mcard.done .mnum{background:var(--moon);color:var(--ink)}
+.mcard.done .mnum::after{content:"⭐";position:absolute;font-size:14px;top:-8px;right:-8px}
+.mic{font-size:40px;line-height:1}
+.mt{font-size:21px;font-weight:700}
+.mm{font-size:15px;color:var(--muted)}
+.sec-head{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.sec-ic{font-size:42px;min-width:76px;height:76px;border-radius:22px;background:#fff;display:grid;place-items:center;border:2px solid var(--line)}
+.sec-kick{font-size:15px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.sec-title{font-size:34px;margin:0;line-height:1.2}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#4a52c9,#8a68dc);color:#fff;border-radius:999px;padding:4px 13px;font-size:13px;font-weight:700}
+.badge.b2{background:linear-gradient(90deg,#1fa79c,#3a8ee0)}
+.badge.b3{background:linear-gradient(90deg,#e9604f,#f39a3d)}
+.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px 24px;box-shadow:0 6px 22px rgba(60,70,150,.08);margin-bottom:18px}
+.card h3{margin:0 0 10px;font-size:25px}
+.card p{margin:6px 0}
+.muted{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:16px}
+.btn{font:inherit;font-weight:700;border:none;border-radius:14px;padding:12px 20px;background:var(--indigo);color:#fff;cursor:pointer;box-shadow:0 4px 0 #343b9e;transition:transform .1s,box-shadow .1s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #343b9e}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.teal{background:var(--teal);box-shadow:0 4px 0 #13786f}
+.btn.coral{background:var(--coral);box-shadow:0 4px 0 #b4402f}
+.btn.lilac{background:var(--lilac);box-shadow:0 4px 0 #6447b3}
+.btn.moon{background:var(--moon);color:var(--ink);box-shadow:0 4px 0 #c99a20}
+.btn.ghost{background:#fff;color:var(--indigo);border:2px solid var(--line);box-shadow:none}
+.btn.big{font-size:24px;padding:16px 36px;border-radius:18px}
+.btn.sm{font-size:16px;padding:8px 14px;border-radius:11px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.sec-nav{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:28px}
+.slide{display:none;text-align:center;padding:10px 6px}
+.slide.on{display:block;animation:fade .4s}
+.scene{font-size:72px;line-height:1.2;margin:10px 0 14px;letter-spacing:6px}
+.story-text{font-size:24px;max-width:820px;margin:0 auto}
+.big-q{font-weight:700;color:var(--indigo)}
+.sl-ctrl{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px}
+.dots{display:flex;gap:8px}
+.dots i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--moon);transform:scale(1.25)}
+.flip{perspective:900px;cursor:pointer;min-height:230px}
+.flip .in{position:relative;width:100%;min-height:230px;transition:transform .6s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid var(--line)}
+.flip .f{background:#fff;box-shadow:0 6px 18px rgba(60,70,150,.08)}
+.flip .f .big{font-size:62px;line-height:1.1}
+.flip .f b{font-size:23px;margin-top:6px}
+.flip .f small{color:var(--muted);font-size:14px;margin-top:6px}
+.flip .b{background:linear-gradient(160deg,#4a52c9,#8a68dc);color:#fff;transform:rotateY(180deg);font-size:20px}
+.pipeline{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;justify-content:center}
+.pstep{background:var(--soft);border-radius:18px;padding:16px;text-align:center;min-width:170px;flex:1}
+.pstep .big{font-size:44px;line-height:1.2}
+.pstep b{display:block;font-size:21px}
+.pstep span{display:block;color:var(--muted);font-size:16px}
+.parrow{font-size:34px;color:var(--lilac);align-self:center}
+.chip{font:inherit;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 12px;cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;min-width:100px;color:var(--ink);transition:transform .12s}
+.chip:hover{transform:translateY(-2px)}
+.chip .big{font-size:42px;line-height:1.15}
+.chip small{font-size:15px;color:var(--muted)}
+.chip.sel{border-color:var(--moon);box-shadow:0 0 0 4px #fbe6a4}
+.chip.ok{border-color:var(--teal);background:#e6f7f5}
+.chip.bad{border-color:var(--coral);background:#fdecea}
+.tray{display:flex;flex-wrap:wrap;gap:10px;padding:14px;background:var(--soft);border-radius:18px;border:2px dashed var(--line);min-height:96px}
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+.bucket{background:#fff;border:3px solid var(--line);border-radius:18px;padding:12px;min-height:150px;cursor:pointer}
+.bucket:hover{border-color:var(--indigo)}
+.bh{font-weight:700;font-size:20px;margin-bottom:8px}
+.bin{display:flex;flex-wrap:wrap;gap:8px}
+.fb{font-weight:700;font-size:20px;min-height:28px}
+.fb.good{color:#13786f}.fb.oops{color:#b4402f}
+.qcard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 20px;margin-bottom:14px}
+.qn{display:inline-block;background:var(--moon);border-radius:10px;padding:2px 10px;font-weight:700;font-size:14px}
+.qq{font-size:21px;font-weight:700;margin:8px 0}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.opt{font:inherit;text-align:left;background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer;color:var(--ink)}
+.opt:hover{border-color:var(--indigo)}
+.opt.right{background:#e3f6f3;border-color:var(--teal)}
+.opt.wrong{background:#fdebe8;border-color:var(--coral)}
+.why{margin:8px 0 0;color:var(--muted)}
+.score-box{text-align:center;font-size:26px;font-weight:700;background:linear-gradient(90deg,#fff6d6,#efeaff);border-radius:18px;padding:18px}
+.tip{background:#fff8e1;border-left:6px solid var(--moon);border-radius:12px;padding:12px 16px;margin:12px 0;font-size:17px}
+.tip.teacher{background:#eef0ff;border-left-color:var(--indigo)}
+.meter{height:24px;background:#eceffa;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.meter>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--sky));transition:width .45s}
+.blk{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:12px;color:#fff;font-weight:700;font-size:18px}
+.blk select,.blk input{font:inherit;font-size:17px;border-radius:8px;border:none;padding:4px 8px;color:var(--ink);background:#fff}
+.blk.if{background:#ef8d2c}.blk.and{background:#c77700}.blk.then{background:var(--indigo)}.blk.when{background:#d9a20a}.blk.do{background:var(--teal)}.blk.say{background:var(--lilac)}
+.rule{background:var(--soft);border-radius:16px;padding:10px 12px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:2px solid var(--line)}
+.codebox{background:#f6f4ff;border:2px solid #ddd6fb;border-radius:16px;padding:14px 16px;font-family:"Courier New",monospace;font-size:17px;white-space:pre-wrap;color:#2c2f6b;line-height:1.55}
+.codebox .k{color:#c2410c;font-weight:700}.codebox .s{color:#0f766e}.codebox .c{color:#7c7fa8}
+.res-table{width:100%;border-collapse:collapse;margin-top:10px}
+.res-table td,.res-table th{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left}
+.res-table th{font-size:15px;color:var(--muted)}
+.discuss{display:grid;gap:14px}
+.dq{font-size:22px;font-weight:700}
+.ans{background:var(--soft);border-radius:12px;padding:10px 14px;margin-top:10px}
+.mission{background:linear-gradient(135deg,#fff8e1,#efeaff);border:2px solid #e9dcff}
+.mission li{margin:6px 0}
+.mission input{transform:scale(1.4);margin-right:10px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:14px 22px;border-radius:16px;font-weight:700;z-index:99;transition:transform .35s;max-width:90vw;text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0)}
+.conf{position:fixed;top:-50px;font-size:30px;pointer-events:none;z-index:98;animation:fall 1.8s linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(380deg)}}
+.pill{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:15px;margin:2px}
+.center{text-align:center}
+@media(max-width:640px){body{font-size:17px}.sec-title{font-size:26px}.scene{font-size:52px}.story-text{font-size:20px}.menu-h{font-size:28px}}
+</style></head><body>
+<header class="top"><div class="brand">Young IT Germany</div><div class="lvl">Level 1 · AI Explorer</div><button class="homebtn" data-go="menu">🏠 Menu</button></header>
+<main>
+<section class="page show" id="title"><div class="title-card"><div class="chap">How AI Makes Choices — Algorithms, Ethics &amp; Fairness</div><div class="luna big-luna"></div><h1>How AI Recommends Videos, Music and Products</h1><button class="btn big moon" data-go="menu">Enter Activities ✨</button></div></section>
+<section class="page" id="menu"><h2 class="menu-h">How AI Recommends Videos, Music and Products</h2><p class="menu-sub">Follow the moon path from 1 to 8 — or tap any part to jump in!</p><div id="menuGrid"></div></section>
+<section class="page" data-sec="hook" data-group="Learn" data-title="Hook / Story" data-min="5" data-icon="📖">
+<div class="card"><div class="slides">
+ <div class="slide"><div class="scene">👦 📺 🦖</div><p class="story-text">On Monday, Aarav watched one video about a T-Rex. It was so cool!</p></div>
+ <div class="slide"><div class="scene">🦕 🦖 🦴 🦕</div><p class="story-text">On Tuesday, the video app showed him… dinosaurs, dinosaurs, and MORE dinosaurs!</p></div>
+ <div class="slide"><div class="scene">🎧 🎵 🛒 ⚽</div><p class="story-text">His music app played songs he loves. And after he looked at a football in a shop app, it showed him football boots everywhere!</p></div>
+ <div class="slide"><div class="scene">🤖 🌙 🔍</div><p class="story-text">Luna whispered: "The apps are not magic. They <b>remember what you do</b> and look for patterns."</p></div>
+ <div class="slide"><div class="scene">🤔 ❓ 📱</div><p class="story-text big-q">How do you think the app "knew" what Aarav likes? What clues did he give it?</p></div>
+</div><div class="row"><button class="btn ghost sm" data-say=".slide.on">🔊 Read to me</button></div></div>
+<div class="tip teacher">👩‍🏫 <b>Teacher tip:</b> Collect clues on the board: clicking, watching till the end, liking, searching. These become the "signals" in today's lesson.</div>
+</section>
+
+<section class="page" data-sec="concept" data-group="Learn" data-title="Simple Concept" data-min="10" data-icon="💡">
+<div class="badges"><span class="badge">🇪🇺 AI Literacy</span><span class="badge b2">🇪🇺 Digital Services Act · Know why you see it</span></div>
+<div class="card"><h3>🔎 The 3 clues an app collects</h3>
+<div class="pipeline"><div class="pstep"><div class="big">👍</div><b>Likes</b><span>You tapped "like"</span></div><div class="pstep"><div class="big">⏱️</div><b>Watch time</b><span>You watched till the end</span></div><div class="pstep"><div class="big">⏭️</div><b>Skips</b><span>You skipped quickly</span></div><div class="parrow">➜</div><div class="pstep"><div class="big">🎁</div><b>Recommendation</b><span>"You might like this!"</span></div></div></div>
+<div class="grid2">
+ <div class="card"><h3>🧲 Way 1: Similar things</h3><p>You liked a <b>dinosaur</b> video 🦖 → the app shows more <b>dinosaur</b> videos 🦕.</p><div class="center" style="font-size:54px">🦖 ➜ 🦕🦴</div></div>
+ <div class="card"><h3>👫 Way 2: People like you</h3><p>Kids who liked 🦖 dinosaurs <b>also</b> liked 🚀 space. So the app shows you space too!</p><div class="center" style="font-size:54px">👦🦖🚀 · 👧🦖🚀 · 🧑🦖❓</div></div>
+</div>
+<div class="card"><h3>🧠 Try it: People like you</h3><p>Look at what these friends like. What should the app recommend to <b>Zara</b>?</p>
+<table class="res-table"><tr><th>Friend</th><th>Likes</th></tr><tr><td>👦 Leo</td><td style="font-size:30px">🐼 🎨 🍕</td></tr><tr><td>👧 Mina</td><td style="font-size:30px">🐼 🎨 🍕</td></tr><tr><td>🧑 Omar</td><td style="font-size:30px">🐼 🎨 🍕</td></tr><tr><td>👧🏽 <b>Zara</b></td><td style="font-size:30px">🐼 🎨 ❓</td></tr></table>
+<div class="row" id="zara"><button class="btn ghost" data-z="0">⚽ Football</button><button class="btn ghost" data-z="1">🍕 Pizza</button><button class="btn ghost" data-z="0">🚗 Cars</button></div><p class="fb" id="zFb"></p></div>
+<h3 style="margin:8px 0 12px">🃏 Magic word cards — tap to flip!</h3>
+<div class="grid3">
+ <div class="flip"><div class="in"><div class="f"><div class="big">🎁</div><b>Recommendation</b><small>Tap to flip 👆</small></div><div class="b">A suggestion from the app: "You might like this!"</div></div></div>
+ <div class="flip"><div class="in"><div class="f"><div class="big">⚙️</div><b>Algorithm</b><small>Tap to flip 👆</small></div><div class="b">A set of steps (like a recipe) the computer follows to choose.</div></div></div>
+ <div class="flip"><div class="in"><div class="f"><div class="big">🫧</div><b>Filter Bubble</b><small>Tap to flip 👆</small></div><div class="b">When an app shows you only ONE kind of thing, and you miss out on other cool stuff.</div></div></div>
+ <div class="flip"><div class="in"><div class="f"><div class="big">📣</div><b>Ad</b><small>Tap to flip 👆</small></div><div class="b">Something a company PAID to show you, so you will buy it.</div></div></div>
+</div>
+</section>
+
+<section class="page" data-sec="demo" data-group="Learn" data-title="Live AI Demo" data-min="10" data-icon="🔮">
+<div class="card"><h3>📺 Luna's Video App</h3><p>Tap ▶ to watch, 👍 to like or 👎 to dislike. Watch how the recommendations change!</p>
+<div class="row" style="margin-top:0"><label style="font-size:17px"><input type="checkbox" id="surprise" style="transform:scale(1.4);margin-right:8px">🎲 Surprise me (add something new)</label><button class="btn ghost sm" id="rReset">↺ Reset</button></div></div>
+<div class="grid2">
+ <div class="card"><h3>🎬 All videos</h3><div id="catalog" style="display:grid;gap:8px"></div></div>
+ <div>
+  <div class="card"><h3>🎁 Recommended for you</h3><div id="recs"></div></div>
+  <div class="card"><h3>🧠 What the app thinks you like</h3><div id="interest"></div></div>
+ </div>
+</div>
+<div class="tip teacher">👩‍🏫 <b>Try this live:</b> like three dinosaur videos and watch the list fill with dinosaurs. Then turn on "Surprise me" — why might apps add new things?</div>
+</section>
+
+<section class="page" data-sec="activity" data-group="Do" data-title="Student Activity" data-min="15" data-icon="🧩">
+<div class="card"><h3>🤖 Be the Recommender!</h3><p>You are the app now! Look at what your friend likes, then pick <b>2 videos</b> they will love.</p>
+<div id="friend"></div></div>
+</section>
+
+<section class="page" data-sec="build" data-group="Do" data-title="Build / Coding Exercise" data-min="20" data-icon="🧱">
+<div class="card"><h3>⚙️ Make the Points Recipe</h3><p>The app gives <b>points</b> to each topic. More points = shown first! Change the numbers and press ▶ Run.</p>
+<div class="grid2"><div>
+ <div class="rule"><span class="blk then">👍 Each like =</span><button class="btn ghost sm" data-w="like" data-d="-1">−</button><b id="w-like" style="font-size:24px;min-width:36px;text-align:center"></b><button class="btn ghost sm" data-w="like" data-d="1">+</button><span>points</span></div>
+ <div class="rule"><span class="blk do">⏱️ Watched till the end =</span><button class="btn ghost sm" data-w="fin" data-d="-1">−</button><b id="w-fin" style="font-size:24px;min-width:36px;text-align:center"></b><button class="btn ghost sm" data-w="fin" data-d="1">+</button><span>points</span></div>
+ <div class="codebox" id="rCode" style="margin-top:10px"></div>
+</div><div><h3>📒 What Meera did</h3><table class="res-table" id="hist"></table></div></div>
+<div class="row"><button class="btn teal" id="rRun">▶ Run</button></div></div>
+<div class="grid2">
+ <div class="card"><h3>🏅 Meera's top videos</h3><div id="top3" class="muted">Press ▶ Run to see.</div></div>
+ <div class="card"><h3>🎯 Mission</h3><p id="m1">⬜ Meera LOVES art — she watches every art video till the end, but she forgets to press 👍. Make 🎨 <b>Draw a Castle</b> come <b>first</b>!</p></div>
+</div>
+</section>
+
+<section class="page" data-sec="challenge" data-group="Do" data-title="Challenge" data-min="15" data-icon="🏆">
+<div class="card"><h3>🫧 Pop the Bubble!</h3><p>Sam only sees 🎮 games. Tap the buttons to show him <b>3 different topics</b>.</p>
+<div id="feed" class="row" style="font-size:40px"></div>
+<p style="margin:12px 0 4px"><b>Colour meter</b> (<span id="topN">1</span> topics)</p><div class="meter"><i id="divBar"></i></div>
+<div id="acts" class="grid2" style="margin-top:14px"></div><p class="fb" id="feedFb"></p>
+<div class="row"><button class="btn ghost" id="feedRst">Start again ↺</button></div></div>
+<div class="card"><h3>🌟 Super Challenge: Spot the Ad</h3><div id="adQ"></div></div>
+</section>
+
+<section class="page" data-sec="discuss" data-group="Wrap" data-title="Discussion" data-min="5" data-icon="💬">
+<div class="discuss">
+ <div class="card"><div class="dq">🤔 Is it good that apps choose videos for us? Why or why not?</div><button class="btn ghost sm" data-reveal>💡 Show an idea</button><div class="ans" hidden>Good: we find things we like faster. Not so good: we may see only one kind of thing and watch for too long.</div></div>
+ <div class="card"><div class="badges"><span class="badge b2">🇪🇺 Digital Services Act</span></div><div class="dq">❓ Should apps tell you WHY they recommend something?</div><button class="btn ghost sm" data-reveal>💡 Show an idea</button><div class="ans" hidden>Yes! In Europe, big apps must explain how their recommendations work and let people choose a feed that is not based on their personal history.</div></div>
+ <div class="card"><div class="dq">⏰ The next video plays by itself (autoplay). How can we stop watching too much?</div><button class="btn ghost sm" data-reveal>💡 Show an idea</button><div class="ans" hidden>Turn off autoplay, set a timer, decide before you start how many videos you will watch.</div></div>
+</div>
+</section>
+
+<section class="page" data-sec="quiz" data-group="Wrap" data-title="Quiz &amp; Take-home Mission" data-min="10" data-icon="🎯">
+<div id="quiz"></div>
+<div class="card mission"><h3>🚀 Take-home Mission: Family Recommender</h3><ul style="list-style:none;padding:0">
+<li><label><input type="checkbox">Ask 3 family members for their 3 favourite foods or shows</label></li>
+<li><label><input type="checkbox">Find a pattern for each person (e.g. "likes spicy food")</label></li>
+<li><label><input type="checkbox">Recommend one NEW thing to each person based on the pattern</label></li>
+<li><label><input type="checkbox">Ask: "Did I recommend well?" — just like an app learns from feedback!</label></li></ul></div>
+</section>
+
+</main><script>const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const LUNA=`<svg viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg"><line x1="60" y1="10" x2="60" y2="24" stroke="#4a52c9" stroke-width="4" stroke-linecap="round"/><path d="M60 1 l3.2 6.4 7 1-5 5 1.2 7-6.4-3.4-6.4 3.4 1.2-7-5-5 7-1z" fill="#f3c44f"/><circle cx="60" cy="52" r="30" fill="#fff4c9" stroke="#f3c44f" stroke-width="4"/><circle cx="75" cy="40" r="5" fill="#f6dd8a"/><circle cx="44" cy="66" r="4" fill="#f6dd8a"/><circle cx="49" cy="50" r="5.5" fill="#1c2250"/><circle cx="71" cy="50" r="5.5" fill="#1c2250"/><circle cx="51" cy="48" r="1.8" fill="#fff"/><circle cx="73" cy="48" r="1.8" fill="#fff"/><path d="M50 62 q10 8 20 0" stroke="#1c2250" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="39" cy="60" r="4" fill="#f9b4a8"/><circle cx="81" cy="60" r="4" fill="#f9b4a8"/><rect x="32" y="84" width="56" height="42" rx="14" fill="#8a68dc"/><rect x="44" y="93" width="32" height="20" rx="6" fill="#eef2fc"/><circle cx="52" cy="103" r="3" fill="#1fa79c"/><circle cx="60" cy="103" r="3" fill="#f3c44f"/><circle cx="68" cy="103" r="3" fill="#e9604f"/><rect x="18" y="89" width="12" height="26" rx="6" fill="#4a52c9"/><rect x="90" y="89" width="12" height="26" rx="6" fill="#4a52c9"/><rect x="40" y="124" width="12" height="13" rx="4" fill="#4a52c9"/><rect x="68" y="124" width="12" height="13" rx="4" fill="#4a52c9"/></svg>`;
+const App={onShow:{},shown:new Set(),done:new Set()};
+const GROUPS=[['Learn','🌙 Learn'],['Do','🚀 Do &amp; Build'],['Wrap','⭐ Wrap Up']];
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function setup(){
+  $$('.luna').forEach(e=>e.innerHTML=LUNA);
+  const secs=$$('section.page[data-sec]');
+  secs.forEach(s=>s.id='s-'+s.dataset.sec);
+  const grid=$('#menuGrid');
+  GROUPS.forEach(([g,label])=>{
+    const list=secs.filter(s=>s.dataset.group===g); if(!list.length)return;
+    grid.insertAdjacentHTML('beforeend',`<div class="grp-h">${label}</div><div class="mgrid" id="mg-${g}"></div>`);
+    list.forEach(s=>{const i=secs.indexOf(s);
+      $('#mg-'+g).insertAdjacentHTML('beforeend',`<button class="mcard g-${g}" data-go="${s.id}"><span class="mnum">${i+1}</span><span class="mic">${s.dataset.icon}</span><span class="mt">${s.dataset.title}</span><span class="mm">⏱ ${s.dataset.min} min</span></button>`)});
+  });
+  secs.forEach((s,i)=>{
+    s.insertAdjacentHTML('afterbegin',`<div class="sec-head"><div class="sec-ic">${s.dataset.icon}</div><div><div class="sec-kick">Part ${i+1} of ${secs.length} · ${s.dataset.min} minutes</div><h2 class="sec-title">${s.dataset.title}</h2></div></div>`);
+    const nx=secs[i+1];
+    s.insertAdjacentHTML('beforeend',`<div class="sec-nav"><button class="btn ghost" data-go="menu">← Back to Menu</button>${nx?`<button class="btn" data-go="${nx.id}">Next: ${nx.dataset.title} →</button>`:`<button class="btn moon" data-go="menu">Finish 🌙</button>`}</div>`);
+  });
+  document.addEventListener('click',e=>{
+    const g=e.target.closest('[data-go]'); if(g){go(g.dataset.go);return}
+    const f=e.target.closest('.flip'); if(f){f.classList.toggle('on');return}
+    const r=e.target.closest('[data-reveal]'); if(r){const t=r.nextElementSibling;t.hidden=!t.hidden;r.textContent=t.hidden?'💡 Show an idea':'🙈 Hide idea';return}
+    const sy=e.target.closest('[data-say]'); if(sy){const t=sy.dataset.say?$('.page.show '+sy.dataset.say):sy.closest('.card');if(t)say(t.innerText)}
+  });
+  $$('.slides').forEach(initSlides);
+}
+function go(id){
+  $$('.page').forEach(p=>p.classList.remove('show'));
+  const p=document.getElementById(id); if(!p)return; p.classList.add('show'); window.scrollTo({top:0});
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  if(!App.shown.has(id)){App.shown.add(id);const sec=p.dataset.sec;if(sec&&App.onShow[sec])App.onShow[sec]()}
+}
+function say(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.9;u.lang='en-US';speechSynthesis.speak(u)}
+function initSlides(el){
+  const sl=$$('.slide',el);let i=0;
+  el.insertAdjacentHTML('beforeend',`<div class="sl-ctrl"><button class="btn ghost prev">◀ Back</button><div class="dots">${sl.map(()=>'<i></i>').join('')}</div><button class="btn next">Next ▶</button></div>`);
+  const dots=$$('.dots i',el),pv=$('.prev',el),nx=$('.next',el);
+  const up=()=>{sl.forEach((s,k)=>s.classList.toggle('on',k===i));dots.forEach((d,k)=>d.classList.toggle('on',k===i));pv.disabled=i===0;nx.disabled=i===sl.length-1};
+  pv.onclick=()=>{if(i>0){i--;up()}};nx.onclick=()=>{if(i<sl.length-1){i++;up()}};up();
+}
+let toastT;
+function toast(m){let t=$('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t)}t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2600)}
+function confetti(){const em=['⭐','🌙','✨','💫','🌟'];for(let k=0;k<26;k++){const s=document.createElement('span');s.className='conf';s.textContent=em[k%em.length];s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.5+'s';s.style.fontSize=(20+Math.random()*20)+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),2600)}}
+function award(sec,msg){App.done.add(sec);const c=$(`.mcard[data-go="s-${sec}"]`);if(c)c.classList.add('done');confetti();toast(msg||'Amazing work! ⭐')}
+function quiz(el,qs,onDone){
+  let score=0,ans=0;
+  el.innerHTML=qs.map((q,i)=>`<div class="qcard"><span class="qn">Question ${i+1}</span><p class="qq">${q.q}</p><div class="opts">${q.o.map((o,j)=>`<button class="opt" data-i="${i}" data-j="${j}">${o}</button>`).join('')}</div><p class="why"></p></div>`).join('')+`<div class="score-box" hidden></div>`;
+  el.addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b)return;const c=b.closest('.qcard');if(c.dataset.done)return;c.dataset.done=1;
+    const q=qs[b.dataset.i],ok=+b.dataset.j===q.a;b.classList.add(ok?'right':'wrong');if(!ok)$$('.opt',c)[q.a].classList.add('right');
+    $('.why',c).innerHTML=(ok?'✅ Correct! ':'💡 ')+q.why;if(ok)score++;ans++;
+    if(ans===qs.length){const sb=$('.score-box',el);sb.hidden=false;const st=Math.round(score/qs.length*5);sb.innerHTML=`You got ${score} out of ${qs.length}! <br>${'⭐'.repeat(st)}${'☆'.repeat(5-st)}<br><span style="font-size:18px;font-weight:400">${score===qs.length?'Perfect! You are a true AI Explorer!':'Great try! Scroll up to read the explanations.'}</span>`;onDone&&onDone(score)}});
+}
+function sorter(el,items,cats,onWin){
+  const build=()=>{
+    el.innerHTML=`<p class="muted">👆 Tap a picture, then tap the box where it belongs.</p><div class="tray">${shuffle(items.map((it,i)=>({...it,i}))).map(it=>`<button class="chip" data-i="${it.i}"><span class="big">${it.e}</span><small>${it.n}</small></button>`).join('')}</div><div class="buckets">${cats.map(c=>`<div class="bucket" data-c="${c.id}"><div class="bh">${c.icon} ${c.name}</div><div class="bin"></div></div>`).join('')}</div><div class="row"><button class="btn teal chk">Check my sorting ✔</button><button class="btn ghost rst">Start again ↺</button></div><p class="fb"></p>`;
+    let sel=null;
+    el.onclick=e=>{
+      const ch=e.target.closest('.chip');
+      if(ch){$$('.chip',el).forEach(c=>c.classList.remove('sel'));if(sel===ch){sel=null;return}sel=ch;ch.classList.add('sel');ch.classList.remove('ok','bad');return}
+      const bk=e.target.closest('.bucket');
+      if(bk&&sel){$('.bin',bk).appendChild(sel);sel.classList.remove('sel');sel=null;return}
+      if(e.target.closest('.rst')){build();return}
+      if(e.target.closest('.chk')){
+        const fb=$('.fb',el);
+        if($$('.tray .chip',el).length){fb.className='fb oops';fb.textContent='Sort every picture first! 🙂';return}
+        let right=0;$$('.bucket',el).forEach(b=>$$('.chip',b).forEach(c=>{const ok=items[c.dataset.i].cat===b.dataset.c;c.classList.add(ok?'ok':'bad');if(ok)right++}));
+        if(right===items.length){fb.className='fb good';fb.textContent=`All ${right} correct! You made perfect training data! 🎉`;onWin&&onWin()}
+        else{fb.className='fb oops';fb.textContent=`${right} of ${items.length} correct. Move the red ones to the right box and check again!`}
+      }
+    };
+  };build();
+}
+window.addEventListener('DOMContentLoaded',setup);
+</script><script>const TAG={dinosaurs:'🦕 Dinosaurs',space:'🚀 Space',animals:'🐼 Animals',football:'⚽ Football',music:'🎵 Music',art:'🎨 Art',cooking:'🍕 Cooking',science:'🔬 Science'};
+App.onShow.concept=()=>{$('#zara').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;const fb=$('#zFb');
+  if(b.dataset.z==='1'){fb.className='fb good';fb.textContent='Yes! Friends who like 🐼 and 🎨 also like 🍕 — that is "people like you"! 🍕';b.classList.remove('ghost');b.classList.add('teal')}
+  else{fb.className='fb oops';fb.textContent='Hmm, none of Zara\'s similar friends liked that. Look at the table again!'}}};
+
+App.onShow.demo=()=>{
+  const V=[['🦖','T-Rex Facts',['dinosaurs','science']],['🦕','Dino Dance Party',['dinosaurs','music']],['🦴','Digging for Fossils',['dinosaurs','science']],['🖍️','Draw a Dinosaur',['art','dinosaurs']],
+    ['🚀','Rocket Launch',['space','science']],['🪐','Planet Tour',['space']],['👩‍🚀','Eating in Space',['space','cooking']],['🌕','Paint the Moon',['art','space']],
+    ['🐼','Baby Pandas',['animals']],['🐬','Dolphin Talk',['animals','science']],['⚽','Best Goals Ever',['football']],['🏆','Football Tricks',['football']],
+    ['🎸','Learn Guitar',['music']],['🥁','Drum Beats',['music']],['🍕','Easy Pizza',['cooking']],['🧪','Fizzy Kitchen Experiments',['science','cooking']]];
+  let I={},W=new Set();
+  $('#catalog').innerHTML=V.map(([e,t,tg],i)=>`<div class="rule" data-v="${i}" style="margin:0;justify-content:space-between"><span><span style="font-size:30px">${e}</span> <b>${t}</b><br>${tg.map(x=>`<span class="pill">${TAG[x]}</span>`).join('')}</span><span><button class="btn sm teal" data-a="w">▶</button> <button class="btn sm ghost" data-a="l">👍</button> <button class="btn sm ghost" data-a="d">👎</button></span></div>`).join('');
+  const render=()=>{
+    const sc=i=>V[i][2].reduce((s,t)=>s+(I[t]||0),0);
+    let cand=V.map((v,i)=>i).filter(i=>!W.has(i)&&sc(i)>0).sort((a,b)=>sc(b)-sc(a)).slice(0,4);
+    let html='';
+    if(!cand.length&&!$('#surprise').checked)html='<p class="muted">Watch or like a video and I will start guessing what you like! 🤖</p>';
+    html+=cand.map(i=>{const best=V[i][2].slice().sort((a,b)=>(I[b]||0)-(I[a]||0))[0];return `<div class="rule"><span style="font-size:34px">${V[i][0]}</span><span><b>${V[i][1]}</b><br><small class="muted">Because you like ${TAG[best]} · score ${sc(i)}</small></span></div>`}).join('');
+    if($('#surprise').checked){const nw=V.map((v,i)=>i).filter(i=>!W.has(i)&&V[i][2].every(t=>(I[t]||0)<=0));if(nw.length){const i=nw[Math.floor(Math.random()*nw.length)];html+=`<div class="rule" style="border-color:#f3c44f"><span style="font-size:34px">${V[i][0]}</span><span><b>${V[i][1]}</b><br><small class="muted">🎲 Something new to explore!</small></span></div>`}}
+    $('#recs').innerHTML=html;
+    const ks=Object.keys(I).filter(k=>I[k]);const mx=Math.max(1,...ks.map(k=>Math.abs(I[k])));
+    $('#interest').innerHTML=ks.length?ks.sort((a,b)=>I[b]-I[a]).map(k=>`<p style="margin:6px 0 2px">${TAG[k]} <b>${I[k]>0?'+':''}${I[k]}</b></p><div class="meter"><i style="width:${Math.abs(I[k])/mx*100}%;${I[k]<0?'background:#e9604f':''}"></i></div>`).join(''):'<p class="muted">Nothing yet — the app knows nothing about you.</p>';
+  };
+  $('#catalog').onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;const row=b.closest('[data-v]'),i=+row.dataset.v,a=b.dataset.a,d=a==='w'?1:a==='l'?2:-2;
+    V[i][2].forEach(t=>I[t]=(I[t]||0)+d);if(a!=='d')W.add(i);row.style.background=a==='d'?'#fdecea':'#e6f7f5';render()};
+  $('#surprise').onchange=render;$('#rReset').onclick=()=>{I={};W=new Set();$$('#catalog .rule').forEach(r=>r.style.background='');render()};render();
+};
+
+App.onShow.activity=()=>{
+  const F=[{n:'👧 Riya',likes:'🐶 Puppies · 🎨 Painting · 🐱 Kittens',o:[['🐰','Caring for Bunnies',1],['⚽','Football Goals',0],['🖍️','Draw Your Pet',1],['🏎️','Racing Cars',0],['🐹','Hamster House',1],['🚀','Rocket Launch',0],['🥁','Drum Solo',0],['🍔','Burger Recipe',0]]},
+    {n:'👦 Kabir',likes:'🚀 Rockets · 🔭 Telescopes · 🤖 Robots',o:[['🧁','Cupcake Party',0],['🪐','Visit Saturn',1],['💃','Dance Moves',0],['👩‍🚀','Life of an Astronaut',1],['🐴','Pony Club',0],['🛠️','Build a Robot',1],['💅','Nail Art',0],['🌸','Flower Garden',0]]},
+    {n:'👧🏽 Ana',likes:'🎵 Songs · 💃 Dance · 🎹 Piano',o:[['🎤','Kids Karaoke',1],['🦖','T-Rex Facts',0],['🥁','Learn Drums',1],['🧮','Maths Tricks',0],['🩰','Ballet for Beginners',1],['🐟','Fishing Trip',0],['🚜','Big Tractors',0],['🧩','Puzzle Speedrun',0]]}];
+  let k=0;
+  const show=()=>{const f=F[k];$('#friend').innerHTML=`<div class="rule" style="font-size:22px"><b>${f.n}</b> likes: ${f.likes}</div><p class="muted">Friend ${k+1} of 3 — tap 3 videos</p><div class="tray" style="background:#fff">${f.o.map((o,i)=>`<button class="chip" data-i="${i}"><span class="big">${o[0]}</span><small>${o[1]}</small></button>`).join('')}</div><div class="row"><button class="btn teal" id="fChk">Recommend ✔</button></div><p class="fb" id="fFb"></p>`;
+    $('#friend .tray').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;if(!b.classList.contains('sel')&&$$('#friend .chip.sel').length>=3){toast('Only 3 picks!');return}b.classList.toggle('sel');b.classList.remove('ok','bad')};
+    $('#fChk').onclick=()=>{const s=$$('#friend .chip.sel');const fb=$('#fFb');if(s.length<3){fb.className='fb oops';fb.textContent='Pick 3 videos first!';return}
+      let g=0;s.forEach(b=>{const ok=f.o[b.dataset.i][2];b.classList.add(ok?'ok':'bad');if(ok)g++});
+      if(g===3){fb.className='fb good';fb.innerHTML=k<2?'Perfect picks! 🎉 <button class="btn sm moon" id="nextF">Next friend ➜</button>':'You recommended perfectly for all 3 friends! 🎉';if(k<2)$('#nextF').onclick=()=>{k++;show()};else award('activity','Super Recommender! 🤖')}
+      else{fb.className='fb oops';fb.textContent=`${g} of 3 match what ${f.n.split(' ')[1]} likes. Swap the red ones!`}}};
+  show();
+};
+
+App.onShow.build=()=>{
+  const w={like:3,fin:1,skip:-1,bonus:0},R={like:[0,5],fin:[0,5],skip:[-5,0],bonus:[0,6]};
+  const H={dinosaurs:[2,0,1],art:[0,3,0],music:[1,1,0],football:[0,0,2]};
+  const C=[['🦖','New T-Rex Video',['dinosaurs']],['🎨','Draw a Castle',['art']],['🎸','Guitar Song',['music']],['⚽','Goal Highlights',['football']],['🔬','Microscope Magic',['science']],['🐙','Ocean Creatures',['animals']]];
+  $('#hist').innerHTML='<tr><th>Topic</th><th>👍 Likes</th><th>⏱️ Finished</th><th>⏭️ Skips</th></tr>'+Object.entries(H).map(([t,[l,f,s]])=>`<tr><td>${TAG[t]}</td><td>${l}</td><td>${f}</td><td>${s}</td></tr>`).join('');
+  const show=()=>{Object.keys(w).forEach(k=>$('#w-'+k).textContent=w[k]);
+    $('#rCode').innerHTML=`<span class="c"># points for each topic</span>\npoints = likes × <span class="s">${w.like}</span>\n       + finished × <span class="s">${w.fin}</span>\n       + skips × <span class="s">(${w.skip})</span>\n<span class="k">if</span> topic <span class="k">is</span> new:\n    points = <span class="s">${w.bonus}</span>`};show();
+  $$('[data-w]').forEach(b=>b.onclick=()=>{const k=b.dataset.w;w[k]=Math.min(R[k][1],Math.max(R[k][0],w[k]+ +b.dataset.d));show()});
+  let m1=false,m2=false;
+  $('#rRun').onclick=()=>{const ts=t=>H[t]?H[t][0]*w.like+H[t][1]*w.fin+H[t][2]*w.skip:w.bonus;
+    const rank=C.map(c=>({c,s:c[2].reduce((a,t)=>a+ts(t),0)})).sort((a,b)=>b.s-a.s);
+    $('#top3').innerHTML=rank.map((r,i)=>`<div class="rule" style="${i>2?'opacity:.45':''}"><b style="font-size:22px;min-width:34px">${i<3?['🥇','🥈','🥉'][i]:i+1}</b><span style="font-size:30px">${r.c[0]}</span><span><b>${r.c[1]}</b><br><small class="muted">${r.s} points</small></span></div>`).join('');
+    if(rank[0].c[1]==='Draw a Castle'&&!m1){m1=true;$('#m1').innerHTML=$('#m1').innerHTML.replace('⬜','✅');toast('Mission 1 done! 🎨')}
+    if(rank.slice(0,3).some(r=>['science','animals'].includes(r.c[2][0]))&&!m2){m2=true;$('#m2').innerHTML=$('#m2').innerHTML.replace('⬜','✅');toast('Mission 2 done! 🔬')}
+    if(m1&&m2&&!App.done.has('build'))award('build','Algorithm designer! ⚙️')};
+};
+
+App.onShow.challenge=()=>{
+  const E={games:'🎮',science:'🔬',animals:'🐼',music:'🎵',sports:'⚽',art:'🎨',cooking:'🍳',space:'🚀'};
+  const A=[['🔍 Search for "volcanoes"',['science','science']],['👍 Like a panda video',['animals','animals']],['⏭️ Skip 3 game videos',['music','sports']],
+    ['🧭 Turn on "Explore new topics"',['art','cooking','space']],['🔁 Watch 5 more game videos',null]];
+  let feed;
+  const draw=()=>{$('#feed').innerHTML=feed.map(t=>`<span class="chip" style="cursor:default">${E[t]}</span>`).join('');const n=new Set(feed).size;$('#topN').textContent=n;$('#divBar').style.width=Math.min(100,n/5*100)+'%';
+    if(n>=5){$('#feedFb').className='fb good';$('#feedFb').textContent=`Bubble popped! 🫧💥 Sam's feed now has ${n} different topics!`;if(!App.done.has('challenge'))award('challenge','Bubble popper! 🏆')}};
+  const reset=()=>{feed=Array(8).fill('games');$('#feedFb').textContent='';$('#acts').innerHTML=A.map((a,i)=>`<button class="btn ${a[1]?'ghost':'ghost'}" data-a="${i}" style="text-align:left">${a[0]}</button>`).join('');draw()};
+  $('#acts').onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=A[b.dataset.a];
+    if(!a[1]){feed=Array(8).fill('games');$('#feedFb').className='fb oops';$('#feedFb').textContent='Oh no! Watching only games made the bubble BIGGER. 🫧';$$('#acts [data-a]').forEach(x=>{x.disabled=false});draw();return}
+    a[1].forEach(t=>{let i=feed.indexOf('games');if(i<0)i=Math.floor(Math.random()*8);feed[i]=t});b.disabled=true;$('#feedFb').textContent='';draw()};
+  $('#feedRst').onclick=reset;reset();
+  quiz($('#adQ'),[
+    {q:'Which of these recommendations is an ad?<br><span class="pill">🦖 Dino Facts</span> <span class="pill">🚀 Moon Landing</span> <span class="pill">🍬 SUPER CANDY — Buy now! · Sponsored</span> <span class="pill">🎨 Draw a Cat</span>',o:['🦖 Dino Facts','🚀 Moon Landing','🍬 Super Candy','🎨 Draw a Cat'],a:2,why:'"Sponsored" means a company paid for it to be there. That is an ad!'},
+    {q:'Why might a video app want you to keep watching for a very long time?',o:['So it can show you more ads','Because it is tired','To help you sleep','It does not care'],a:0,why:'More watching = more ads = more money for the app. You decide when to stop!'}]);
+};
+
+App.onShow.quiz=()=>quiz($('#quiz'),[
+  {q:'Which is a clue an app uses to guess what you like?',o:['Your shoe size','The videos you like and watch','The weather','Your pet\'s name'],a:1,why:'Likes, watch time and skips are the main clues.'},
+  {q:'You skip a video after 2 seconds. What does the app learn?',o:['You love it','You probably don\'t like it','Nothing','You want 10 more'],a:1,why:'Skipping quickly is a "no thanks" clue.'},
+  {q:'"Kids who liked dinosaurs also liked space." This is called…',o:['People like you','A filter bubble','An ad','A frame'],a:0,why:'The app uses people with similar likes to recommend.'},
+  {q:'What is a filter bubble?',o:['A bath toy','Seeing only one kind of thing','A video game','A type of ad'],a:1,why:'When the app shows only one kind of thing, you miss other cool stuff.'},
+  {q:'An algorithm is like a…',o:['Recipe of steps','Musical instrument','Animal','Planet'],a:0,why:'An algorithm is a list of steps the computer follows.'},
+  {q:'A video says "Sponsored". What does it mean?',o:['A friend made it','A company paid to show it to you','It is the best video','It is free candy'],a:1,why:'Sponsored = an ad. Think before you buy!'}
+],s=>{if(s>=4)award('quiz','Quiz star! 🎯')});
+</script><script>App.onShow.activity=()=>{
+  const F=[{n:'👧 Riya',likes:'🐶 Puppies · 🐱 Kittens',o:[['🐰','Baby Bunnies',1],['⚽','Football',0],['🐹','Hamster House',1],['🚗','Racing Cars',0],['🍔','Burgers',0],['🚀','Rockets',0]]},
+    {n:'👦 Kabir',likes:'🚀 Rockets · 🌙 The Moon',o:[['🧁','Cupcakes',0],['🪐','Visit Saturn',1],['🐴','Ponies',0],['👩‍🚀','Astronaut Life',1],['🌸','Flowers',0],['💅','Nail Art',0]]}];
+  let k=0;
+  const show=()=>{const f=F[k];$('#friend').innerHTML=`<div class="rule" style="font-size:24px"><b>${f.n}</b> likes: ${f.likes}</div><p class="muted">Friend ${k+1} of 2 — tap 2 videos</p><div class="tray" style="background:#fff">${f.o.map((o,i)=>`<button class="chip" data-i="${i}"><span class="big">${o[0]}</span><small>${o[1]}</small></button>`).join('')}</div><div class="row"><button class="btn teal" id="fChk">Recommend ✔</button></div><p class="fb" id="fFb"></p>`;
+    $('#friend .tray').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;if(!b.classList.contains('sel')&&$$('#friend .chip.sel').length>=2){toast('Only 2 picks!');return}b.classList.toggle('sel');b.classList.remove('ok','bad')};
+    $('#fChk').onclick=()=>{const s=$$('#friend .chip.sel'),fb=$('#fFb');if(s.length<2){fb.className='fb oops';fb.textContent='Pick 2 videos first!';return}
+      let g=0;s.forEach(b=>{const ok=f.o[b.dataset.i][2];b.classList.add(ok?'ok':'bad');if(ok)g++});
+      if(g===2){fb.className='fb good';fb.innerHTML=k<1?'Perfect! 🎉 <button class="btn sm moon" id="nextF">Next friend ➜</button>':'You are a super recommender! 🎉';if(k<1)$('#nextF').onclick=()=>{k++;show()};else award('activity','Super Recommender! 🤖')}
+      else{fb.className='fb oops';fb.textContent='Hmm, look at what they like and try again!'}}};
+  show();
+};
+
+App.onShow.build=()=>{
+  const w={like:3,fin:0};const H={dinosaurs:[2,0],art:[0,3],music:[1,1]};
+  const C=[['🦖','New T-Rex Video','dinosaurs'],['🎨','Draw a Castle','art'],['🎸','Guitar Song','music']];
+  $('#hist').innerHTML='<tr><th>Topic</th><th>👍 Likes</th><th>⏱️ Watched till end</th></tr>'+Object.entries(H).map(([t,[l,f]])=>`<tr><td>${TAG[t]}</td><td>${l}</td><td>${f}</td></tr>`).join('');
+  const show=()=>{$('#w-like').textContent=w.like;$('#w-fin').textContent=w.fin;$('#rCode').innerHTML=`points = likes × <span class="s">${w.like}</span>\n       + watched × <span class="s">${w.fin}</span>`};show();
+  $$('[data-w]').forEach(b=>b.onclick=()=>{const k=b.dataset.w;w[k]=Math.min(5,Math.max(0,w[k]+ +b.dataset.d));show()});
+  $('#rRun').onclick=()=>{const rank=C.map(c=>({c,s:H[c[2]][0]*w.like+H[c[2]][1]*w.fin})).sort((a,b)=>b.s-a.s);
+    $('#top3').innerHTML=rank.map((r,i)=>`<div class="rule"><b style="font-size:22px">${['🥇','🥈','🥉'][i]}</b><span style="font-size:30px">${r.c[0]}</span><span><b>${r.c[1]}</b><br><small class="muted">${r.s} points</small></span></div>`).join('');
+    if(rank[0].c[1]==='Draw a Castle'&&rank[0].s>rank[1].s){$('#m1').innerHTML=$('#m1').innerHTML.replace('⬜','✅');award('build','Recipe master! ⚙️')}};
+};
+
+App.onShow.challenge=()=>{
+  const E={games:'🎮',science:'🔬',animals:'🐼',music:'🎵',art:'🎨'};
+  const A=[['🔍 Search for "volcanoes"','science'],['👍 Like a panda video','animals'],['🎨 Watch a drawing video','art'],['🔁 Watch more games',null]];
+  let feed;
+  const draw=()=>{$('#feed').innerHTML=feed.map(t=>`<span class="chip" style="cursor:default">${E[t]}</span>`).join('');const n=new Set(feed).size;$('#topN').textContent=n;$('#divBar').style.width=Math.min(100,n/3*100)+'%';
+    if(n>=3){$('#feedFb').className='fb good';$('#feedFb').textContent='Bubble popped! 🫧💥 Sam\'s feed is colourful now!';if(!App.done.has('challenge'))award('challenge','Bubble popper! 🏆')}};
+  const reset=()=>{feed=Array(6).fill('games');$('#feedFb').textContent='';$('#acts').innerHTML=A.map((a,i)=>`<button class="btn ghost" data-a="${i}">${a[0]}</button>`).join('');draw()};
+  $('#acts').onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=A[b.dataset.a];
+    if(!a[1]){feed=Array(6).fill('games');$('#feedFb').className='fb oops';$('#feedFb').textContent='Oh no! More games made the bubble bigger! 🫧';$$('#acts [data-a]').forEach(x=>x.disabled=false);draw();return}
+    for(let k=0;k<2;k++){const i=feed.indexOf('games');if(i>=0)feed[i]=a[1]}b.disabled=true;$('#feedFb').textContent='';draw()};
+  $('#feedRst').onclick=reset;reset();
+  quiz($('#adQ'),[{q:'Which one is an ad?<br><span class="pill">🦖 Dino Facts</span> <span class="pill">🍬 SUPER CANDY — Buy now! · Sponsored</span>',o:['🦖 Dino Facts','🍬 Super Candy'],a:1,why:'"Sponsored" means a company paid to show it. That is an ad!'}]);
+};
+
+App.onShow.quiz=()=>quiz($('#quiz'),[
+  {q:'You like a dinosaur video 🦖. What will the app show next?',o:['🦕 More dinosaurs','🧦 Socks'],a:0,why:'The app shows more of what you like.'},
+  {q:'You skip a video very fast ⏭️. The app thinks…',o:['😍 You love it','🙅 You don\'t like it'],a:1,why:'Skipping fast means "no thanks".'},
+  {q:'A filter bubble means…',o:['🫧 Seeing only one kind of thing','🛁 Bath time'],a:0,why:'Only one kind of thing — you miss other fun stuff!'},
+  {q:'"Sponsored" means…',o:['💰 Someone paid to show it','👫 Your friend made it'],a:0,why:'It is an ad.'},
+  {q:'How can you see new things in your app?',o:['🔍 Search for something new','🔁 Watch the same thing all day'],a:0,why:'Exploring new topics pops the bubble!'}
+],s=>{if(s>=4)award('quiz','Quiz star! 🎯')});
+</script></body></html>
